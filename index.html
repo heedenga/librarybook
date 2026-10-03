@@ -87,19 +87,19 @@ footer{color:var(--muted);font-size:.84rem}
       <span class="tag">카드 1</span>
       <h2>구입 예정 목록</h2>
       <p class="hint">엑셀 파일(.xlsx, .xls). '책 제목' 열은 꼭 있어야 하고, 저자·출판사·ISBN 열은 있으면 함께 읽습니다.</p>
-      <p class="state" id="stP">예시 4종 표시 중</p>
+      <p class="state" id="stP">파일을 올려주세요</p>
       <input type="file" id="fileP" accept=".xlsx,.xls,.csv">
     </label>
     <label class="slot" id="slotH">
       <span class="tag">카드 2</span>
       <h2>도서관 소장 목록</h2>
       <p class="hint">독서로 DLS의 자료관리 리스트 반출 파일. 반출할 때 ISBN 항목을 넣으면 더 정확합니다.</p>
-      <p class="state" id="stH">예시 3권 표시 중</p>
+      <p class="state" id="stH">파일을 올려주세요</p>
       <input type="file" id="fileH" accept=".xlsx,.xls,.csv">
     </label>
   </section>
 
-  <p class="notice" id="notice">지금 보이는 결과는 예시 데이터입니다. 파일 두 개를 올리면 실제 결과로 바뀝니다.</p>
+  <p class="notice" id="notice">구입 예정 목록과 소장 목록 파일을 올려주세요.</p>
 
   <fieldset class="crit">
     <legend>비교 기준</legend>
@@ -140,18 +140,8 @@ footer{color:var(--muted);font-size:.84rem}
   var AUTHOR_KEYS=['저자','저자명','지은이','저작자'];
   var OPT={pub:['출판사','발행처','발행자','출판사명'],isbn:['isbn','isbn13','isbn10','표준번호','국제표준도서번호'],seq:['순번','번호','no'],reg:['등록번호'],call:['청구기호'],status:['자료상태','상태'],note:['비고']};
 
-  var sample=true, filter='all', results=[];
-  var purchase=[
-    {seq:1,title:'잊기 좋은 이름',author:'김애란 지음'},
-    {seq:2,title:'프루스트 클럽',author:'김혜진 지음'},
-    {seq:3,title:'어제의 세계',author:'슈테판 츠바이크 지음, 이노은 옮김'},
-    {seq:4,title:'예민한 뇌 사용 설명서',author:'박수현 지음'}
-  ];
-  var holdings=[
-    {title:'잊기 좋은 이름',author:'김애란 지음',reg:'0000028473',call:'814.6 김63ㅇ',status:'대출가능'},
-    {title:'프루스트 클럽',author:'김혜진 지음',reg:'0000010756',call:'813.6 김988프',status:'대출가능'},
-    {title:'어제의 세계',author:'온다 리쿠;권남희',reg:'(예시)',call:'',status:'대출가능'}
-  ];
+  var sample=false, filter='all', results=[];
+  var purchase=[], holdings=[];
 
   function key(s){return String(s==null?'':s).replace(/\s+/g,'').toLowerCase()}
   function normTitle(s){
@@ -224,7 +214,7 @@ footer{color:var(--muted);font-size:.84rem}
     if(b._t!==undefined)return;
     b._t=normTitle(b.title);b._a=authors(b.author);b._p=normPub(b.pub);b._i=isbns(b.isbn);
   }
-  var cols={P:{author:true,pub:false,isbn:false},H:{author:true,pub:false,isbn:false}};
+  var cols={P:{author:false,pub:false,isbn:false},H:{author:false,pub:false,isbn:false}};
   function syncCrit(){
     var miss=[];
     [['useAuthor','author','저자'],['usePub','pub','출판사'],['useIsbn','isbn','ISBN']].forEach(function(a){
@@ -300,7 +290,7 @@ footer{color:var(--muted);font-size:.84rem}
     if(purchase.length&&holdings.length){compare();$('notice').hidden=!sample}
     else{
       results=[];$('notice').hidden=false;
-      $('notice').textContent=purchase.length?'소장 목록 파일도 올려주세요.':'구입 예정 목록 파일도 올려주세요.';
+      $('notice').textContent=purchase.length?'소장 목록 파일도 올려주세요.':(holdings.length?'구입 예정 목록 파일도 올려주세요.':'구입 예정 목록과 소장 목록 파일을 올려주세요.');
     }
     render();
   }
