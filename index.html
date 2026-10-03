@@ -3,138 +3,728 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<style>html{color-scheme:light}body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style>
 <title>복본 검색대</title>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Gowun+Batang:wght@400;700&family=IBM+Plex+Sans+KR:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Pretendard:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
-/* 레이아웃: 목록카드 두 장(구입목록·소장목록)을 나란히 꽂고, 그 아래 판정 서랍(요약 칩 + 결과표)이 열리는 구조 */
-:root{
-  --paper:#efe6d3; --card:#fbf6ea; --ink:#2b2620; --muted:#6f6555; --line:#cdbf9f;
-  --cloth:#2f5d50; --cloth-fg:#f6f1e3;
-  --dup:#a23b2a; --dup-bg:#f3d9cf; --chk:#8a5a00; --chk-bg:#f5e3b5; --ok:#3d6a3a; --ok-bg:#dde8d2;
-  --display:"Gowun Batang","Nanum Myeongjo",serif;
-  --body:"IBM Plex Sans KR","Apple SD Gothic Neo","Malgun Gothic",sans-serif;
-  --mono:"IBM Plex Mono","D2Coding",ui-monospace,monospace;
+:root {
+  --bg: #f8fafc;
+  --surface: #ffffff;
+  --surface-alt: #f1f5f9;
+  --border: #e2e8f0;
+  --border-strong: #cbd5e1;
+  --text-main: #0f172a;
+  --text-muted: #64748b;
+  --text-dim: #94a3b8;
+
+  --primary: #2563eb;
+  --primary-hover: #1d4ed8;
+  --primary-light: #eff6ff;
+  --primary-border: #bfdbfe;
+
+  --dup-text: #dc2626;
+  --dup-bg: #fef2f2;
+  --dup-border: #fecaca;
+
+  --chk-text: #d97706;
+  --chk-bg: #fffbeb;
+  --chk-border: #fde68a;
+
+  --ok-text: #16a34a;
+  --ok-bg: #f0fdf4;
+  --ok-border: #bbf7d0;
+
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 14px;
+  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.07), 0 2px 4px -2px rgb(0 0 0 / 0.05);
+  --font-sans: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, monospace;
 }
-@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
-  --paper:#1e1b16; --card:#2a261f; --ink:#ece4d2; --muted:#a89c86; --line:#4a4234;
-  --cloth:#7fb8a4; --cloth-fg:#14201c;
-  --dup:#f0998a; --dup-bg:#4a251e; --chk:#e8c069; --chk-bg:#45360f; --ok:#9fcc98; --ok-bg:#263523;
-  color-scheme:dark}}
-:root[data-theme="dark"]{
-  --paper:#1e1b16; --card:#2a261f; --ink:#ece4d2; --muted:#a89c86; --line:#4a4234;
-  --cloth:#7fb8a4; --cloth-fg:#14201c;
-  --dup:#f0998a; --dup-bg:#4a251e; --chk:#e8c069; --chk-bg:#45360f; --ok:#9fcc98; --ok-bg:#263523;
-  color-scheme:dark}
-*{box-sizing:border-box}
-body{background:var(--paper);color:var(--ink);font-family:var(--body);font-size:15px;line-height:1.6}
-.wrap{max-width:1080px;margin:0 auto;padding-inline:20px;padding-block:28px 56px;display:flex;flex-direction:column;gap:22px}
-header h1{font-family:var(--display);font-weight:700;font-size:1.9rem;margin:0;letter-spacing:-.01em}
-header p{margin:4px 0 0;color:var(--muted);max-width:60ch}
-.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:16px}
-.slot{position:relative;background:var(--card);border:1px solid var(--line);border-radius:3px;padding:16px 18px 18px;display:flex;flex-direction:column;gap:8px;min-width:0;cursor:pointer}
-.slot::after{content:"";position:absolute;left:50%;bottom:8px;width:10px;height:10px;margin-left:-5px;border-radius:50%;background:var(--paper);border:1px solid var(--line)}
-.slot.over{outline:2px dashed var(--cloth);outline-offset:3px}
-.slot:focus-within{outline:2px solid var(--cloth);outline-offset:3px}
-.slot .tag{font-family:var(--mono);font-size:.72rem;letter-spacing:.08em;color:var(--cloth);text-transform:uppercase}
-.slot h2{font-family:var(--display);font-size:1.15rem;margin:0;border-bottom:1px solid var(--dup);padding-bottom:6px}
-.slot .hint{color:var(--muted);font-size:.86rem;margin:0}
-.slot .state{font-family:var(--mono);font-size:.82rem;margin:0 0 12px;overflow-wrap:anywhere}
-.slot input{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%}
-.notice{font-size:.88rem;color:var(--chk);background:var(--chk-bg);border-radius:3px;padding:8px 12px;margin:0}
-.crit{border:1px solid var(--line);border-radius:3px;background:var(--card);margin:0;padding:8px 14px 10px;display:flex;flex-wrap:wrap;gap:6px 18px;align-items:center}
-.crit legend{font-size:.74rem;letter-spacing:.08em;color:var(--muted);font-weight:600;padding:0 6px}
-.crit label{display:inline-flex;gap:6px;align-items:center;cursor:pointer}
-.crit label.off{color:var(--muted);cursor:not-allowed}
-.crit input{accent-color:var(--cloth);width:16px;height:16px}
-.why{color:var(--muted)}
-.bar{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
-.chip{font:inherit;font-size:.9rem;border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:999px;padding:6px 14px;cursor:pointer;display:inline-flex;gap:8px;align-items:baseline}
-.chip b{font-family:var(--mono);font-variant-numeric:tabular-nums;font-weight:500}
-.chip[aria-pressed="true"]{background:var(--cloth);color:var(--cloth-fg);border-color:var(--cloth)}
-.chip:focus-visible,.btn:focus-visible,#q:focus-visible{outline:2px solid var(--cloth);outline-offset:2px}
-#q{font:inherit;flex:1 1 200px;min-width:0;padding:7px 12px;border:1px solid var(--line);border-radius:3px;background:var(--card);color:var(--ink)}
-.btn{font:inherit;font-size:.9rem;border:1px solid var(--cloth);background:transparent;color:var(--cloth);border-radius:3px;padding:7px 14px;cursor:pointer}
-.tablebox{overflow-x:auto;border:1px solid var(--line);border-radius:3px;background:var(--card)}
-table{border-collapse:collapse;width:100%;min-width:640px}
-th{font-size:.74rem;letter-spacing:.08em;color:var(--muted);text-align:left;font-weight:600;padding:10px 12px;border-bottom:1px solid var(--line);white-space:nowrap}
-td{padding:10px 12px;border-bottom:1px dotted var(--line);vertical-align:top}
-tr:last-child td{border-bottom:0}
-td.n{font-family:var(--mono);font-variant-numeric:tabular-nums;color:var(--muted);width:3.5em}
-.t{font-weight:600}
-.a{color:var(--muted);font-size:.86rem}
-.pill{display:inline-block;font-size:.8rem;font-weight:600;border-radius:3px;padding:2px 9px;white-space:nowrap}
-.pill.dup{color:var(--dup);background:var(--dup-bg)}
-.pill.chk{color:var(--chk);background:var(--chk-bg)}
-.pill.ok{color:var(--ok);background:var(--ok-bg)}
-.own{font-size:.86rem;display:flex;flex-direction:column;gap:6px}
-.own code{font-family:var(--mono);font-size:.8rem;color:var(--cloth)}
-.own .x{color:var(--dup)}
-.empty{padding:28px;text-align:center;color:var(--muted)}
-#copyout{width:100%;height:120px;font-family:var(--mono);font-size:.78rem;background:var(--card);color:var(--ink);border:1px solid var(--line)}
-footer{color:var(--muted);font-size:.84rem}
+
+[data-theme="dark"] {
+  --bg: #0b0f17;
+  --surface: #131923;
+  --surface-alt: #1a2230;
+  --border: #232d3f;
+  --border-strong: #334155;
+  --text-main: #f1f5f9;
+  --text-muted: #94a3b8;
+  --text-dim: #64748b;
+
+  --primary: #3b82f6;
+  --primary-hover: #60a5fa;
+  --primary-light: #1e293b;
+  --primary-border: #1d4ed8;
+
+  --dup-text: #f87171;
+  --dup-bg: #2d1417;
+  --dup-border: #5c1d24;
+
+  --chk-text: #fbbf24;
+  --chk-bg: #2d2110;
+  --chk-border: #593e11;
+
+  --ok-text: #4ade80;
+  --ok-bg: #0f241a;
+  --ok-border: #164e32;
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  background-color: var(--bg);
+  color: var(--text-main);
+  font-family: var(--font-sans);
+  font-size: 14px;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.wrap {
+  max-width: 1140px;
+  margin: 0 auto;
+  padding: 36px 20px 72px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+/* Header */
+header {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 18px;
+}
+.header-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.header-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--primary);
+  background: var(--primary-light);
+  border: 1px solid var(--primary-border);
+  padding: 3px 10px;
+  border-radius: 999px;
+  width: fit-content;
+}
+header h1 {
+  font-size: 1.7rem;
+  font-weight: 700;
+  letter-spacing: -0.025em;
+  color: var(--text-main);
+}
+header p {
+  color: var(--text-muted);
+  font-size: 0.93rem;
+  max-width: 680px;
+}
+
+/* 테마 전환 버튼 */
+.theme-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border-radius: 999px;
+  border: 1px solid var(--border-strong);
+  background: var(--surface);
+  color: var(--text-main);
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  font-family: inherit;
+}
+.theme-btn:hover {
+  background: var(--surface-alt);
+  border-color: var(--primary);
+  color: var(--primary);
+}
+
+/* 파일 업로드 카드 그리드 */
+.cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 16px;
+}
+.slot {
+  position: relative;
+  background: var(--surface);
+  border: 1.5px dashed var(--border-strong);
+  border-radius: var(--radius-lg);
+  padding: 22px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: var(--shadow-sm);
+}
+.slot:hover {
+  border-color: var(--primary);
+  background: var(--surface-alt);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
+.slot.over {
+  border-color: var(--primary);
+  background: var(--primary-light);
+  box-shadow: 0 0 0 4px var(--primary-border);
+}
+.slot.loaded {
+  border-style: solid;
+  border-color: var(--border);
+  background: var(--surface);
+}
+.slot input[type="file"] {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  cursor: pointer;
+  width: 100%;
+  height: 100%;
+}
+.slot-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.slot .tag {
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  color: var(--primary);
+  background: var(--primary-light);
+  padding: 2px 8px;
+  border-radius: var(--radius-sm);
+  text-transform: uppercase;
+}
+.slot-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: var(--radius-md);
+  background: var(--surface-alt);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-muted);
+  transition: 0.2s;
+}
+.slot:hover .slot-icon {
+  background: var(--primary);
+  color: #fff;
+}
+.slot h2 {
+  font-size: 1.08rem;
+  font-weight: 700;
+  color: var(--text-main);
+}
+.slot .hint {
+  color: var(--text-muted);
+  font-size: 0.84rem;
+  line-height: 1.45;
+}
+.slot-status {
+  margin-top: auto;
+  padding: 10px 12px;
+  border-radius: var(--radius-md);
+  background: var(--surface-alt);
+  border: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.82rem;
+  color: var(--text-muted);
+}
+.slot-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--text-dim);
+  flex-shrink: 0;
+}
+.slot.loaded .slot-dot {
+  background: #10b981;
+  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.2);
+}
+.slot .state {
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* 상단 안내 박스 */
+.notice {
+  font-size: 0.88rem;
+  color: var(--chk-text);
+  background: var(--chk-bg);
+  border: 1px solid var(--chk-border);
+  border-radius: var(--radius-md);
+  padding: 10px 14px;
+  font-weight: 500;
+}
+
+/* 비교 기준 패널 */
+.crit {
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  background: var(--surface);
+  padding: 12px 18px;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+.crit-left {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+.crit-title {
+  font-size: 0.8rem;
+  letter-spacing: 0.02em;
+  color: var(--text-muted);
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.crit-items {
+  display: flex;
+  gap: 14px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+.crit label {
+  display: inline-flex;
+  gap: 6px;
+  align-items: center;
+  cursor: pointer;
+  font-size: 0.88rem;
+  font-weight: 500;
+  user-select: none;
+}
+.crit label.off {
+  color: var(--text-dim);
+  cursor: not-allowed;
+}
+.crit input[type="checkbox"] {
+  accent-color: var(--primary);
+  width: 15px;
+  height: 15px;
+  border-radius: 4px;
+}
+.crit .a {
+  color: var(--chk-text);
+  font-size: 0.82rem;
+  font-weight: 500;
+}
+
+/* 필터 및 검색 툴바 */
+.bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+  justify-content: space-between;
+}
+.bar-filters {
+  display: inline-flex;
+  background: var(--surface-alt);
+  padding: 3px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border);
+  gap: 2px;
+}
+.chip {
+  font-family: inherit;
+  font-size: 0.84rem;
+  font-weight: 500;
+  border: none;
+  background: transparent;
+  color: var(--text-muted);
+  border-radius: var(--radius-sm);
+  padding: 6px 14px;
+  cursor: pointer;
+  display: inline-flex;
+  gap: 6px;
+  align-items: center;
+  transition: all 0.15s ease;
+}
+.chip b {
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  font-weight: 600;
+  padding: 1px 6px;
+  border-radius: 999px;
+  background: rgba(0, 0, 0, 0.05);
+}
+[data-theme="dark"] .chip b {
+  background: rgba(255, 255, 255, 0.1);
+}
+.chip[aria-pressed="true"] {
+  background: var(--surface);
+  color: var(--text-main);
+  font-weight: 600;
+  box-shadow: var(--shadow-sm);
+}
+.chip[aria-pressed="true"] b {
+  background: var(--primary-light);
+  color: var(--primary);
+}
+
+.search-wrap {
+  position: relative;
+  flex: 1 1 240px;
+  max-width: 420px;
+  margin-left: auto;
+}
+.search-icon {
+  position: absolute;
+  left: 11px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--text-dim);
+  pointer-events: none;
+}
+#q {
+  width: 100%;
+  font-family: inherit;
+  font-size: 0.88rem;
+  padding: 8px 12px 8px 34px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  background: var(--surface);
+  color: var(--text-main);
+  outline: none;
+  transition: border-color 0.15s;
+}
+#q:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px var(--primary-border);
+}
+
+.btn {
+  font-family: inherit;
+  font-size: 0.85rem;
+  font-weight: 600;
+  border: 1px solid var(--border-strong);
+  background: var(--surface);
+  color: var(--text-main);
+  border-radius: var(--radius-md);
+  padding: 8px 14px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.15s;
+}
+.btn:hover {
+  background: var(--surface-alt);
+  border-color: var(--primary);
+  color: var(--primary);
+}
+
+/* 결과 테이블 */
+.tablebox {
+  overflow-x: auto;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  background: var(--surface);
+  box-shadow: var(--shadow-sm);
+}
+table {
+  border-collapse: collapse;
+  width: 100%;
+  min-width: 760px;
+}
+th {
+  background: var(--surface-alt);
+  color: var(--text-muted);
+  font-size: 0.76rem;
+  letter-spacing: 0.04em;
+  text-align: left;
+  font-weight: 600;
+  text-transform: uppercase;
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--border);
+  white-space: nowrap;
+}
+td {
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--border);
+  vertical-align: top;
+  font-size: 0.9rem;
+}
+tr:last-child td {
+  border-bottom: none;
+}
+tr:hover td {
+  background: var(--surface-alt);
+}
+td.n {
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  color: var(--text-dim);
+  width: 56px;
+}
+.t {
+  font-weight: 600;
+  color: var(--text-main);
+  margin-bottom: 3px;
+}
+.a {
+  color: var(--text-muted);
+  font-size: 0.82rem;
+}
+
+/* 판정 뱃지 */
+.pill {
+  display: inline-flex;
+  align-items: center;
+  font-size: 0.78rem;
+  font-weight: 600;
+  border-radius: 999px;
+  padding: 3px 10px;
+  white-space: nowrap;
+  border: 1px solid transparent;
+}
+.pill.dup {
+  color: var(--dup-text);
+  background: var(--dup-bg);
+  border-color: var(--dup-border);
+}
+.pill.chk {
+  color: var(--chk-text);
+  background: var(--chk-bg);
+  border-color: var(--chk-border);
+}
+.pill.ok {
+  color: var(--ok-text);
+  background: var(--ok-bg);
+  border-color: var(--ok-border);
+}
+
+.own {
+  font-size: 0.84rem;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.own > div {
+  line-height: 1.5;
+  padding-bottom: 6px;
+}
+.own > div:not(:last-child) {
+  border-bottom: 1px dashed var(--border);
+}
+.own code {
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  color: var(--primary);
+  background: var(--surface-alt);
+  padding: 1px 5px;
+  border-radius: 4px;
+  font-weight: 500;
+}
+.own .why {
+  color: var(--text-muted);
+  font-size: 0.78rem;
+}
+.own .x {
+  color: var(--dup-text);
+  font-size: 0.78rem;
+  font-weight: 500;
+}
+
+.empty {
+  padding: 60px 20px;
+  text-align: center;
+  color: var(--text-muted);
+  font-size: 0.9rem;
+}
+
+#copyout {
+  width: 100%;
+  height: 90px;
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  background: var(--surface-alt);
+  color: var(--text-main);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 10px;
+}
+
+footer {
+  font-size: 0.82rem;
+  color: var(--text-muted);
+  line-height: 1.6;
+  border-top: 1px solid var(--border);
+  padding-top: 16px;
+}
+footer b {
+  color: var(--text-main);
+}
 </style>
 </head>
 <body>
 <div class="wrap">
   <header>
+    <div class="header-top">
+      <div class="header-badge">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+        안전한 브라우저 자체 분석 (외부 전송 없음)
+      </div>
+      <!-- 테마 토글 버튼 -->
+      <button class="theme-btn" id="themeToggle" type="button" aria-label="테마 전환">
+        <span id="themeIcon">🌙</span>
+        <span id="themeLabel">다크 모드</span>
+      </button>
+    </div>
     <h1>복본 검색대</h1>
-    <p>구입 예정 목록과 도서관 소장 목록을 올리면, 파일에 들어 있는 제목·저자·출판사·ISBN으로 이미 있는 책을 한 번에 가려냅니다. 파일은 이 브라우저 안에서만 읽습니다.</p>
+    <p>구입 예정 목록과 도서관 소장 목록을 올리면, 제목·저자·출판사·ISBN을 바탕으로 이미 소장 중인 책을 신속하게 판정합니다.</p>
   </header>
 
   <section class="cards">
     <label class="slot" id="slotP">
-      <span class="tag">카드 1</span>
+      <div class="slot-top">
+        <span class="tag">카드 1</span>
+        <div class="slot-icon">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+        </div>
+      </div>
       <h2>구입 예정 목록</h2>
-      <p class="hint">엑셀 파일(.xlsx, .xls). '책 제목' 열은 꼭 있어야 하고, 저자·출판사·ISBN 열은 있으면 함께 읽습니다.</p>
-      <p class="state" id="stP">파일을 올려주세요</p>
+      <p class="hint">엑셀 파일(.xlsx, .xls, .csv). '책 제목' 열은 필수이며 저자·출판사·ISBN 열은 있으면 함께 읽습니다.</p>
+      <div class="slot-status">
+        <div class="slot-dot"></div>
+        <span class="state" id="stP">파일을 올려주세요</span>
+      </div>
       <input type="file" id="fileP" accept=".xlsx,.xls,.csv">
     </label>
+
     <label class="slot" id="slotH">
-      <span class="tag">카드 2</span>
+      <div class="slot-top">
+        <span class="tag">카드 2</span>
+        <div class="slot-icon">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+        </div>
+      </div>
       <h2>도서관 소장 목록</h2>
-      <p class="hint">독서로 DLS의 자료관리 리스트 반출 파일. 반출할 때 ISBN 항목을 넣으면 더 정확합니다.</p>
-      <p class="state" id="stH">파일을 올려주세요</p>
+      <p class="hint">독서로 DLS의 자료관리 리스트 반출 파일. 반출 시 ISBN 항목을 넣으면 더 정확합니다.</p>
+      <div class="slot-status">
+        <div class="slot-dot"></div>
+        <span class="state" id="stH">파일을 올려주세요</span>
+      </div>
       <input type="file" id="fileH" accept=".xlsx,.xls,.csv">
     </label>
   </section>
 
   <p class="notice" id="notice">구입 예정 목록과 소장 목록 파일을 올려주세요.</p>
 
-  <fieldset class="crit">
-    <legend>비교 기준</legend>
-    <label><input type="checkbox" id="useTitle" checked disabled> 제목</label>
-    <label><input type="checkbox" id="useAuthor" checked> 저자</label>
-    <label><input type="checkbox" id="usePub"> 출판사</label>
-    <label><input type="checkbox" id="useIsbn" checked> ISBN</label>
+  <div class="crit">
+    <div class="crit-left">
+      <span class="crit-title">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+        비교 기준
+      </span>
+      <div class="crit-items">
+        <label><input type="checkbox" id="useTitle" checked disabled> 제목 (필수)</label>
+        <label><input type="checkbox" id="useAuthor" checked> 저자</label>
+        <label><input type="checkbox" id="usePub"> 출판사</label>
+        <label><input type="checkbox" id="useIsbn" checked> ISBN</label>
+      </div>
+    </div>
     <span class="a" id="critNote"></span>
-  </fieldset>
+  </div>
 
   <section class="bar" id="bar">
-    <button class="chip" data-f="all" aria-pressed="true">전체 <b id="cAll">0</b></button>
-    <button class="chip" data-f="dup" aria-pressed="false">복본 <b id="cDup">0</b></button>
-    <button class="chip" data-f="chk" aria-pressed="false">확인 필요 <b id="cChk">0</b></button>
-    <button class="chip" data-f="ok" aria-pressed="false">미소장 <b id="cOk">0</b></button>
-    <input type="search" id="q" placeholder="결과에서 제목·저자 찾기" aria-label="결과에서 제목·저자 찾기">
-    <button class="btn" id="copy">결과 복사</button>
+    <div class="bar-filters">
+      <button class="chip" data-f="all" aria-pressed="true">전체 <b id="cAll">0</b></button>
+      <button class="chip" data-f="dup" aria-pressed="false">복본 <b id="cDup">0</b></button>
+      <button class="chip" data-f="chk" aria-pressed="false">확인 필요 <b id="cChk">0</b></button>
+      <button class="chip" data-f="ok" aria-pressed="false">미소장 <b id="cOk">0</b></button>
+    </div>
+    
+    <div class="search-wrap">
+      <svg class="search-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input type="search" id="q" placeholder="결과에서 제목·저자·ISBN 찾기" aria-label="결과에서 제목·저자 찾기">
+    </div>
+
+    <button class="btn" id="copy">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+      <span>결과 복사</span>
+    </button>
   </section>
   <textarea id="copyout" hidden readonly aria-label="복사할 결과"></textarea>
 
   <div class="tablebox">
     <table>
-      <thead><tr><th>순번</th><th>구입 예정 도서</th><th>판정</th><th>소장 자료 (등록번호 · 청구기호 · 상태 · 근거)</th></tr></thead>
+      <thead>
+        <tr>
+          <th>순번</th>
+          <th style="width: 36%;">구입 예정 도서</th>
+          <th style="width: 100px;">판정</th>
+          <th>소장 자료 (등록번호 · 저자 · 청구기호 · 상태 · 근거)</th>
+        </tr>
+      </thead>
       <tbody id="rows"></tbody>
     </table>
   </div>
 
   <footer>
-    판정 기준 · ISBN이 같으면 바로 <b>복본</b>입니다. ISBN이 없거나 다르면 띄어쓰기·문장부호·'세트·전○권' 표기를 무시하고 제목을 비교하고, 켜 둔 기준(저자·출판사·ISBN)이 모두 맞으면 <b>복본</b>, 하나라도 다르면 <b>확인 필요</b>로 표시하고 무엇이 다른지 적습니다. 한쪽 파일에 값이 비어 있는 항목은 비교에서 빼고 판정합니다. 제목과 저자는 같은데 ISBN이 다르면 개정판이나 다른 판본일 수 있습니다.
+    <b>판정 기준</b> · ISBN이 같으면 바로 <b>복본</b>입니다. ISBN이 없거나 다르면 띄어쓰기·문장부호·'세트·전○권' 표기를 정규화하여 제목을 비교하고, 켜 둔 기준(저자·출판사·ISBN)이 모두 맞으면 <b>복본</b>, 하나라도 다르면 <b>확인 필요</b>로 표시하고 차이점을 적습니다. 한쪽 파일에 값이 비어 있는 항목은 비교에서 빼고 판정합니다.
   </footer>
 </div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script>
 (function(){
+  // --- 테마(다크모드/라이트모드) 토글 제어 ---
+  var themeToggle = document.getElementById('themeToggle');
+  var themeIcon = document.getElementById('themeIcon');
+  var themeLabel = document.getElementById('themeLabel');
+
+  function applyTheme(theme) {
+    if (theme === 'dark') {
+      document.documentElement.setAttribute('data-theme', 'dark');
+      themeIcon.textContent = '☀️';
+      themeLabel.textContent = '라이트 모드';
+    } else {
+      document.documentElement.removeAttribute('data-theme');
+      themeIcon.textContent = '🌙';
+      themeLabel.textContent = '다크 모드';
+    }
+  }
+
+  var savedTheme = localStorage.getItem('theme');
+  var prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+  applyTheme(savedTheme || (prefersDark ? 'dark' : 'light'));
+
+  themeToggle.addEventListener('click', function(){
+    var isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+    var next = isDark ? 'light' : 'dark';
+    localStorage.setItem('theme', next);
+    applyTheme(next);
+  });
+
+  // --- 기존 핵심 로직 (100% 보존) ---
   var $=function(id){return document.getElementById(id)};
   var TITLE_KEYS=['책제목','자료명','서명','도서명','제목','표제'];
   var AUTHOR_KEYS=['저자','저자명','지은이','저작자'];
@@ -297,16 +887,22 @@ footer{color:var(--muted);font-size:.84rem}
 
   function load(file,which){
     if(!file)return;
+    var slot=$(which==='P'?'slotP':'slotH');
     var st=$(which==='P'?'stP':'stH');
     st.textContent=file.name+' 읽는 중…';
     setTimeout(function(){
       readSheet(file,function(err,list,found){
-        if(err){st.textContent=err;return}
+        if(err){
+          st.textContent=err;
+          slot.classList.remove('loaded');
+          return;
+        }
         if(sample){sample=false;purchase=[];holdings=[];cols.P={author:false,pub:false,isbn:false};cols.H={author:false,pub:false,isbn:false};$('stP').textContent='파일을 올려주세요';$('stH').textContent='파일을 올려주세요'}
         if(which==='P')purchase=list;else holdings=list;
         cols[which]=found;
+        slot.classList.add('loaded');
         var names=['제목'];if(found.author)names.push('저자');if(found.pub)names.push('출판사');if(found.isbn)names.push('ISBN');
-        st.textContent=file.name+' · '+list.length.toLocaleString()+(which==='P'?'종':'권')+' · 읽은 열: '+names.join('·');
+        st.textContent=file.name+' · '+list.length.toLocaleString()+(which==='P'?'종':'권')+' ('+names.join('·')+')';
         refresh();
       });
     },30);
@@ -338,10 +934,11 @@ footer{color:var(--muted);font-size:.84rem}
       });
     });
     var text=lines.join('\n'),btn=$('copy');
-    var fallback=function(){var t=$('copyout');t.hidden=false;t.value=text;t.select();btn.textContent='아래 칸에서 복사하세요'};
+    var span=btn.querySelector('span')||btn;
+    var fallback=function(){var t=$('copyout');t.hidden=false;t.value=text;t.select();span.textContent='아래 칸에서 복사하세요'};
     try{
       navigator.clipboard.writeText(text).then(function(){
-        btn.textContent='복사됨 · 엑셀에 붙여넣기';setTimeout(function(){btn.textContent='결과 복사'},2500);
+        span.textContent='복사됨 · 엑셀에 붙여넣기';setTimeout(function(){span.textContent='결과 복사'},2500);
       },fallback);
     }catch(e){fallback()}
   });
